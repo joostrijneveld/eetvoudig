@@ -8,6 +8,7 @@ class Wbw_list(models.Model):
     def __str__(self):
         return self.name
 
+
 class Participant(models.Model):
     wbw_list = models.ManyToManyField(Wbw_list, through='Participation')
     wbw_id = models.IntegerField(unique=True)
@@ -33,4 +34,3 @@ class Meal(models.Model):
     participants = models.ManyToManyField(Participant, blank=True)
     bystanders = models.ManyToManyField(Bystander, blank=True)
     payer = models.ForeignKey(Participant, null=True, related_name='paymeal')
-
