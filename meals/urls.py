@@ -18,4 +18,5 @@ from meals import views
 
 urlpatterns = [
     url(r'^$', views.meal, name='meal'),
+    url(r'^update$', views.update_lists),
 ]
