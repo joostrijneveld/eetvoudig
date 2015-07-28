@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from meals.models import Meal, Wbw_list, Participant, Participation
 from django.http import HttpResponse
 from django.conf import settings
@@ -13,8 +13,8 @@ def meal(request):
         context['meal'] = Meal.objects.get(completed=False)
     except Meal.DoesNotExist:
         if 'startmeal' in request.POST:
-            context['meal'] = Meal()
-            context['meal'].save()
+            Meal().save()
+            redirect('meal')
     return render(request, 'meals/meal.html', context)
 
 
