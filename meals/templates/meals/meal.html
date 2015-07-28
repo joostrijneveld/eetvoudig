@@ -1,0 +1,40 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>eetvoudig</title>
+    {% load bootstrap3 %}
+    {% load display_euro %}
+    {% bootstrap_css %}
+    {% load staticfiles %}
+    {% load git_head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'meals/style.css' %}?v={% git_head %}" />
+</head>
+<body>
+    <div class='row'>
+        <div class='col-md-6 col-md-offset-3'>
+            <div id='content'>
+                <h2>eetvoudig</h2>
+                <p>
+                    Voor wanneer je gewoon een maaltijd van <em>p</em> euro met <em>n</em> mensen wilt delen à <em><sup>p</sup> &frasl; <sub>n</sub></em> p.p., en dat op Wiebetaaltwat.nl wilt bijhouden.
+                </p>
+                <hr/>
+                {% if not meal %}
+                <p>
+                    Er is nog geen maaltijd gestart. Wil je nu een nieuwe maaltijd beginnen?
+                    <form method='post' id='startform'>
+                        {% csrf_token %}
+                        <button type='submit' class='btn btn-primary' name='startmeal'>Begin nieuwe maaltijd</button>
+                    </form>
+                </p>
+                {% else %}
+
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% bootstrap_javascript jquery=1 %}
+    <script type="text/javascript" src="{% static 'orders/script.js' %}?v={% git_head %}"></script>
+</body>
+</html>
