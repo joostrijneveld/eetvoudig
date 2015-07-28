@@ -7,9 +7,14 @@ class Wbw_list(models.Model):
 
 
 class Participant(models.Model):
-    wbw_list = models.ForeignKey(Wbw_list, null=True)
+    wbw_list = models.ManyToManyField(Wbw_list, through='Participation')
     wbw_id = models.IntegerField(unique=True)
+
+
+class Participation(models.Model):
     name = models.CharField(max_length=200)
+    wbw_list = models.ForeignKey(Wbw_list)
+    participant = models.ForeignKey(Participant)
 
 
 class Bystander(models.Model):
