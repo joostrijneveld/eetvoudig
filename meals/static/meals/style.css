@@ -19,3 +19,17 @@ body {
 form#startform {
     text-align:center;
 }
+
+.footer {
+    text-align:center;
+    font-size: 12px;
+}
+
+.footer a {
+    color: #999;
+}
+
+.footer a:hover, .footer a:focus {
+    color: #333;
+    text-decoration: none;
+}
