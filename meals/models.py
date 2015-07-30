@@ -19,6 +19,9 @@ class Participation(models.Model):
     wbw_list = models.ForeignKey(Wbw_list)
     participant = models.ForeignKey(Participant)
 
+    def __str__(self):
+        return self.name
+
 
 class Bystander(models.Model):
     name = models.CharField(max_length=200)
