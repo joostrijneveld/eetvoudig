@@ -13,95 +13,97 @@
     <link rel="stylesheet" type="text/css" href="{% static 'meals/style.css' %}?v={% git_head %}" />
 </head>
 <body>
-    <div class='row'>
-        <div class='col-md-6 col-md-offset-3'>
-            <div id='content'>
-                <h2>eetvoudig</h2>
-                <p>
-                    Voor wanneer je een maaltijd van <em>p</em> euro met <em>n</em> mensen wilt delen à <em><sup>p</sup> &frasl; <sub>n</sub></em> p.p., en dat op Wiebetaaltwat.nl wilt bijhouden.
-                </p>
-                <hr/>
-                {% if not meal %}
-                <p>
-                    Er is nog geen maaltijd gestart. Wil je nu een nieuwe maaltijd beginnen? Selecteer dan een van de Wiebetaaltwat-lijsten waar eetvoudig toegang toe heeft.
-                </p>
-                <p>
-                    <form method='post' id='startform' class="form-inline">
-                        {% csrf_token %}
-                        {% bootstrap_form lists_form layout='inline' %}
-                        <button type='submit' class='btn btn-primary' name='startmeal'>Begin nieuwe maaltijd</button>
-                    </form>
-                </p>
-                <p>
-                    Wil je ook eetvoudig gebruiken, maar staat je Wiebetaaltwat-lijst er nog niet bij? Voeg dan eetvoudig@joostrijneveld.nl toe aan je lijst, en klik op deze knop:
-                    <a class='btn btn-default' href="{% url 'update' %}" data-toggle="tooltip" data-placement="top" title="Herlaad de Wiebetaaltwat-lijsten">{% bootstrap_icon "refresh" %}</a>.
-                </p>
-                {% else %}
-                <p>
-                    Er is op dit moment een maaltijd aan de gang. Deelnemen? Geef dan hieronder aan wie je bent, of wie er voor je betaalt.
-                </p>
-                <p>
-                    <div class='text-center'>
-                        <ul class="nav nav-pills" style='display:inline-block'>
-                            <li class="active"><a data-toggle="pill" href="#participate">Zelf betalen</a></li>
-                            <li><a data-toggle="pill" href="#standby">Iemand anders laten betalen</a></li>
-                        </ul>
-                    </div>
-                    <div class="tab-content">
-                        <div id="participate" class="tab-pane active">
+    <div class='container'>
+        <div class='row'>
+            <div class='col-md-6 col-md-offset-3'>
+                <div id='content'>
+                    <h2>eetvoudig</h2>
+                    <p>
+                        Voor wanneer je een maaltijd van <em>p</em> euro met <em>n</em> mensen wilt delen à <em><sup>p</sup> &frasl; <sub>n</sub></em> p.p., en dat op Wiebetaaltwat.nl wilt bijhouden.
+                    </p>
+                    <hr/>
+                    {% if not meal %}
+                    <p>
+                        Er is nog geen maaltijd gestart. Wil je nu een nieuwe maaltijd beginnen? Selecteer dan een van de Wiebetaaltwat-lijsten die eetvoudig kan inzien.
+                    </p>
+                    <p>
+                        <form method='post' id='startform' class="form-inline">
+                            {% csrf_token %}
+                            {% bootstrap_form lists_form layout='inline' %}
+                            <button type='submit' class='btn btn-primary' name='startmeal'>Begin nieuwe maaltijd</button>
+                        </form>
+                    </p>
+                    <p>
+                        Ook eetvoudig gebruiken, maar staat je Wiebetaaltwat-lijst er nog niet bij? Voeg eetvoudig@joostrijneveld.nl toe aan je lijst, en klik op deze knop:
+                        <a class='btn btn-default btn-xs' href="{% url 'update' %}" data-toggle="tooltip" data-placement="top" title="Herlaad de Wiebetaaltwat-lijsten">{% bootstrap_icon "refresh" %}</a>.
+                    </p>
+                    {% else %}
+                    <p>
+                        Er is op dit moment een maaltijd aan de gang. Deelnemen? Geef dan hieronder aan wie je bent, of wie er voor je betaalt.
+                    </p>
+                    <p>
+                        <div class='text-center'>
+                            <ul class="nav nav-pills" style='display:inline-block'>
+                                <li class="active"><a data-toggle="pill" href="#participate">Zelf betalen</a></li>
+                                <li><a data-toggle="pill" href="#standby">Iemand anders laten betalen</a></li>
+                            </ul>
+                        </div>
+                        <div class="tab-content">
+                            <div id="participate" class="tab-pane active">
+                                <form method='post'>
+                                    {% csrf_token %}
+                                    {% bootstrap_form participation_form %}
+                                    <div class='form-group text-center' style='margin-top:10px;'>
+                                        <button type='submit' class='btn btn-primary' name='participate'>Deelnemen</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div id="standby" class="tab-pane">
                             <form method='post'>
                                 {% csrf_token %}
                                 {% bootstrap_form participation_form %}
-                                <div class='form-group text-center' style='margin-top:10px;'>
-                                    <button type='submit' class='btn btn-primary' name='participate'>Deelnemen</button>
-                                </div>
-                            </form>
+                                {% bootstrap_form bystander_form %}
+                                    <div class='form-group text-center' style='margin-top:10px;'>
+                                        <button type='submit' class='btn btn-primary' name='bystand'>Deelnemen</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                        <div id="standby" class="tab-pane">
-                        <form method='post'>
+                    </p>
+                    <hr />
+                    <p>
+                        Deze maaltijd begon op <strong>{{ meal.date }}</strong>, en gaat uit van de lijst <strong>'{{ meal.wbw_list.name }}'</strong>.
+                    </p>
+                    <p>
+                        <strong>Deelnemers</strong>
+                    </p>
+                    <p>
+                        {% if not eaters %}
+                            <i>Nog geen deelnemers.</i>
+                        {% endif %}
+                        {% for eater in eaters %}
+                            {% if eater.bystander %}{{ eater.bystander.name }} (via {{ eater.participation.name }}){% else %} {{ eater.participation.name }}{% endif %}{% if not forloop.last %}{% ifequal forloop.revcounter 2 %} en {% else %}, {% endifequal %} {% endif %}
+                        {% endfor %}
+                    </p>
+                    <p>
+                        <form method="post">
                             {% csrf_token %}
-                            {% bootstrap_form participation_form %}
-                            {% bootstrap_form bystander_form %}
-                                <div class='form-group text-center' style='margin-top:10px;'>
-                                    <button type='submit' class='btn btn-primary' name='bystand'>Deelnemen</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </p>
-                <hr />
-                <p>
-                    Deze maaltijd begon op <strong>{{ meal.date }}</strong>, en gaat uit van de lijst <strong>'{{ meal.wbw_list.name }}'</strong>.
-                </p>
-                <p>
-                    <strong>Deelnemers</strong>
-                </p>
-                <p>
-                    {% if not eaters %}
-                        <i>Nog geen deelnemers.</i>
+                            {% bootstrap_messages %}
+                            {% bootstrap_form form %}
+                            {% bootstrap_form_errors form type='non_fields' %}
+                            <div class="form-group text-center">
+                                <button type='submit' class='btn' name='abort'>Afbreken</button>
+                                <button type='submit' class='btn btn-primary' name='update'>Opslaan</button>
+                                <button type='submit' class='btn btn-success' name='finalise'>Verwerken</button>
+                            </div>
+                        </form>
+                    </p>
                     {% endif %}
-                    {% for eater in eaters %}
-                        {% if eater.bystander %}{{ eater.bystander.name }} (via {{ eater.participation.name }}){% else %} {{ eater.participation.name }}{% endif %}{% if not forloop.last %}{% ifequal forloop.revcounter 2 %} en {% else %}, {% endifequal %} {% endif %}
-                    {% endfor %}
-                </p>
-                <p>
-                    <form method="post">
-                        {% csrf_token %}
-                        {% bootstrap_messages %}
-                        {% bootstrap_form form %}
-                        {% bootstrap_form_errors form type='non_fields' %}
-                        <div class="form-group text-center">
-                            <button type='submit' class='btn' name='abort'>Afbreken</button>
-                            <button type='submit' class='btn btn-primary' name='update'>Opslaan</button>
-                            <button type='submit' class='btn btn-success' name='finalise'>Verwerken</button>
-                        </div>
-                    </form>
-                </p>
-                {% endif %}
-                <hr />
-                <div class="footer">
-                    <p><a href='https://github.com/joostrijneveld/eetvoudig/'>eetvoudig ({% git_head %})</a></p>
-                </div>
+                    <hr />
+                    <div class="footer">
+                        <p><a href='https://github.com/joostrijneveld/eetvoudig/'>eetvoudig ({% git_head %})</a></p>
+                    </div>
+                </div>      
             </div>
         </div>
     </div>
