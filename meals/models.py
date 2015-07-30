@@ -37,4 +37,4 @@ class Meal(models.Model):
     wbw_list = models.ForeignKey(Wbw_list, null=True)
     participants = models.ManyToManyField(Participant, blank=True)
     bystanders = models.ManyToManyField(Bystander, blank=True)
-    payer = models.ForeignKey(Participant, null=True, related_name='paymeal')
+    payer = models.ForeignKey(Participant, null=True, blank=True, related_name='paymeal')
