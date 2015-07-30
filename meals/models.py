@@ -22,6 +22,7 @@ class Participation(models.Model):
 
 class Bystander(models.Model):
     name = models.CharField(max_length=200)
+    participant = models.ForeignKey(Participant)
 
 
 class Meal(models.Model):
