@@ -33,6 +33,9 @@ def meal(request):
             meal.bystanders.add(form.instance)
             meal.save()
             return redirect('meal')
+        if 'abort' in request.POST:
+            meal.delete()
+            return redirect('meal')
 
         qs = Participation.objects.filter(wbw_list=meal.wbw_list)
         context['participation_form'] = ParticipationForm()
