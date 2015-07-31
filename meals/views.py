@@ -64,10 +64,7 @@ def meal(request):
 
 
 def update_lists(request):
-    session = requests.Session()
-    payload = {'action': 'login', 'username': settings.WBW_EMAIL,
-               'password': settings.WBW_PASSWORD, 'login_submit': 'Inloggen'}
-    response = session.post('https://wiebetaaltwat.nl', payload)
+    session, response = _create_wbw_session()
     soup = BeautifulSoup(response.text, 'html.parser')
     lists = [x.a for x in soup.tbody.findAll('td') if x.a is not None]
     listdata = [(x.attrs['href'][15:-13], x.text) for x in lists]
@@ -87,3 +84,11 @@ def update_lists(request):
             p.name = name
             p.save()
     return redirect('meal')
+
+
+def _create_wbw_session():
+    session = requests.Session()
+    payload = {'action': 'login', 'username': settings.WBW_EMAIL,
+               'password': settings.WBW_PASSWORD, 'login_submit': 'Inloggen'}
+    response = session.post('https://wiebetaaltwat.nl', payload)
+    return (session, response)
