@@ -112,12 +112,15 @@ def update_lists(request):
         soup = BeautifulSoup(response.text, 'html.parser')
         trs = soup.tbody.findAll('tr')
         userdata = [(tr.attrs['id'][7:], tr.td.span.text) for tr in trs]
+        userdata = [(uid, name) for uid, name in userdata if uid != settings.WBW_UID]
         Participation.objects.filter(wbw_list=wbw_list).delete()
         for uid, name in userdata:
             participant, _ = Participant.objects.get_or_create(wbw_id=uid)
             p = Participation(wbw_list=wbw_list, participant=participant)
             p.name = name
             p.save()
+        if len(userdata) == 0:
+            wbw_list.delete()
     return redirect('meal')
 
 
