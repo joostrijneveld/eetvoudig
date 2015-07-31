@@ -26,18 +26,19 @@ def meal(request):
                                                       wbw_list=meal.wbw_list)
             eaters.append({'participation':participation, 'bystander':b})
 
+        # these should probably be split into different view functions
         if 'update' in request.POST:
             context['form'] = form = MealForm(request.POST, instance=meal)
             if form.is_valid():
                 form.save()
-            return redirect('meal')
-        if 'participate' in request.POST:
+                return redirect('meal')
+        elif 'participate' in request.POST:
             pk = int(request.POST['participations'])
             participation = Participation.objects.get(pk=pk)
             meal.participants.add(participation.participant)
             meal.save()
             return redirect('meal')
-        if 'bystand' in request.POST:
+        elif 'bystand' in request.POST:
             pk = int(request.POST['participations'])
             form = BystanderForm(request.POST)
             participation = Participation.objects.get(pk=pk)
@@ -46,7 +47,7 @@ def meal(request):
             meal.bystanders.add(form.instance)
             meal.save()
             return redirect('meal')
-        if 'abort' in request.POST:
+        elif 'abort' in request.POST:
             meal.delete()
             return redirect('meal')
 
