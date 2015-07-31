@@ -101,6 +101,10 @@ USE_TZ = True
 WBW_EMAIL = 'replacemewithanemail'
 WBW_PASSWORD = 'replacemewithapassword'
 
+BOOTSTRAP3 = {
+    'success_css_class': '',
+}
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
