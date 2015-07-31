@@ -2,7 +2,7 @@ from django.forms import ModelForm, widgets
 import django.forms as forms
 from django.forms.utils import flatatt
 from django.utils.html import format_html
-from meals.models import Meal, Wbw_list, Bystander
+from meals.models import Meal, Wbw_list, Bystander, Participation
 
 
 class EuroWidget(widgets.TextInput):
@@ -18,7 +18,14 @@ class EuroWidget(widgets.TextInput):
 
 
 class ParticipationForm(forms.Form):
-    participations = forms.ModelChoiceField(label='Betalende', queryset=None)
+    participations = forms.ModelChoiceField(label='Betalende',
+                                            queryset=Participation.objects.all())
+
+    def __init__(self, *args, **kwargs):
+        wbw_list = kwargs.pop('wbw_list')
+        forms.Form.__init__(self, *args, **kwargs)
+        qs = Participation.objects.filter(wbw_list=wbw_list)
+        self.fields['participations'].queryset = qs
 
 
 class BystanderForm(ModelForm):

@@ -13,6 +13,19 @@ def meal(request):
     context['lists_form'] = WbwListsForm()
     try:
         meal = context['meal'] = Meal.objects.get(completed=False)
+        context['participation_form'] = ParticipationForm(wbw_list=meal.wbw_list)
+        context['bystander_form'] = BystanderForm()
+        context['form'] = MealForm(instance=meal)
+        context['eaters'] = eaters = []
+        for p in meal.participants.all():
+            participation = Participation.objects.get(participant=p,
+                                                      wbw_list=meal.wbw_list)
+            eaters.append({'participation':participation, 'participant':p})
+        for b in meal.bystanders.all():
+            participation = Participation.objects.get(participant=b.participant,
+                                                      wbw_list=meal.wbw_list)
+            eaters.append({'participation':participation, 'bystander':b})
+
         if 'update' in request.POST:
             form = MealForm(request.POST, instance=meal)
             if form.is_valid():
@@ -37,21 +50,6 @@ def meal(request):
             meal.delete()
             return redirect('meal')
 
-        qs = Participation.objects.filter(wbw_list=meal.wbw_list)
-        context['participation_form'] = ParticipationForm()
-        context['bystander_form'] = BystanderForm()
-        context['participation_form'].fields['participations'].queryset = qs
-        context['form'] = MealForm(instance=meal)
-        context['form'].fields['payer'].queryset = qs
-        context['eaters'] = eaters = []
-        for p in meal.participants.all():
-            participation = Participation.objects.get(participant=p,
-                                                      wbw_list=meal.wbw_list)
-            eaters.append({'participation':participation, 'participant':p})
-        for b in meal.bystanders.all():
-            participation = Participation.objects.get(participant=b.participant,
-                                                      wbw_list=meal.wbw_list)
-            eaters.append({'participation':participation, 'bystander':b})
     except Meal.DoesNotExist:
         if 'startmeal' in request.POST:
             form = WbwListsForm(request.POST)
