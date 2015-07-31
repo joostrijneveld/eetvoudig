@@ -3,9 +3,14 @@ from meals.models import Meal, Wbw_list, Participant, Participation
 from meals.forms import MealForm, WbwListsForm, ParticipationForm, BystanderForm
 from django.http import HttpResponse
 from django.conf import settings
+from django.contrib import messages
+from django.utils.timezone import localtime
+from datetime import datetime
 
 from bs4 import BeautifulSoup
 import requests
+from itertools import chain
+from collections import defaultdict
 
 
 def meal(request):
@@ -50,6 +55,37 @@ def meal(request):
         elif 'abort' in request.POST:
             meal.delete()
             return redirect('meal')
+        elif 'finalise' in request.POST:
+            context['form'] = MealForm(request.POST, instance=meal)
+            errors = False  # surely there's a more elegant way to do this
+            if not meal.payer:
+                context['form'].add_error('payer', "Wie gaat dit geintje betalen?.")
+                errors = True
+            if not meal.price > 0:
+                context['form'].add_error('price', "Er moet wel iets te betalen vallen.")
+                errors = True
+            if not meal.participants.all() and not meal.bystanders.all():
+                messages.error(request, "Zonder deelnemers valt er niks te verwerken.")
+                errors = True
+            if not errors:
+                session, response = _create_wbw_session()
+                date = datetime.strftime(localtime(meal.date), "%d-%m-%Y")
+                payload = defaultdict(lambda: 0,
+                                      {'action': 'add_transaction',
+                                       'lid': meal.wbw_list.list_id,
+                                       'payment_by': meal.payer.wbw_id,
+                                       'description': meal.description,
+                                       'date': date,
+                                       'amount': meal.price / 100,
+                                       'submit_add': 'Verwerken'})
+                for p in chain(meal.participants.all(),
+                               [b.participant for b in meal.bystanders.all()]):
+                    payload['factor[{}]'.format(p.wbw_id)] += 1
+                session.post('https://wiebetaaltwat.nl/index.php', payload)
+                meal.completed = True
+                meal.save()
+                messages.success(request, "De maaltijd is verwerkt!")
+                return redirect('meal')
 
     except Meal.DoesNotExist:
         if 'startmeal' in request.POST:
