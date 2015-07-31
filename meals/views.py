@@ -27,7 +27,7 @@ def meal(request):
             eaters.append({'participation':participation, 'bystander':b})
 
         if 'update' in request.POST:
-            form = MealForm(request.POST, instance=meal)
+            context['form'] = form = MealForm(request.POST, instance=meal)
             if form.is_valid():
                 form.save()
             return redirect('meal')
