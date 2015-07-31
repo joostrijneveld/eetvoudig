@@ -22,6 +22,7 @@
                         Voor wanneer je een maaltijd van <em>p</em> euro met <em>n</em> mensen wilt delen à <em><sup>p</sup> &frasl; <sub>n</sub></em> p.p., en dat op Wiebetaaltwat.nl wilt bijhouden.
                     </p>
                     <hr/>
+                    {% bootstrap_messages %}
                     {% if not meal %}
                     <p>
                         Er is nog geen maaltijd gestart. Wil je nu een nieuwe maaltijd beginnen? Selecteer dan een van de Wiebetaaltwat-lijsten die eetvoudig kan inzien.
@@ -88,13 +89,12 @@
                     <p>
                         <form method="post">
                             {% csrf_token %}
-                            {% bootstrap_messages %}
                             {% bootstrap_form form %}
                             {% bootstrap_form_errors form type='non_fields' %}
                             <div class="form-group text-center">
                                 <button type='submit' class='btn' name='abort' onclick='return confirm("Weet je zeker dat je de maaltijd wil afbreken? Dit kan niet ongedaan gemaakt worden.")'>Afbreken</button>
                                 <button type='submit' class='btn btn-primary' name='update'>Opslaan</button>
-                                <button type='submit' class='btn btn-success' name='finalise'>Verwerken</button>
+                                <button type='submit' class='btn btn-success' name='finalise' onclick='return confirm("Weet je zeker dat je de maaltijd wilt verwerken? Dit kan niet ongedaan gemaakt worden, en vult daadwerkelijk dingen in op Wiebetaaltwat.nl")'>Verwerken</button>
                             </div>
                         </form>
                     </p>
