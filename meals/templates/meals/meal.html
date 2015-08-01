@@ -80,10 +80,23 @@
                     <p>
                         {% if not eaters %}
                             <i>Nog geen deelnemers.</i>
+                        {% else %}
+                        <form method='post'>
+                            {% csrf_token %}
+                            <ul class="list-unstyled">
+                            {% for eater in eaters %}
+                                <li>
+                                {% if eater.bystander %}
+                                    {{ eater.bystander.name }} (via {{ eater.participation.name }})
+                                    <button name='unbystand' value='{{ eater.bystander.pk }}' type='submit' class='btn btn-danger btn-xs'>{% bootstrap_icon 'remove' %}</button>
+                                {% else %}
+                                    {{ eater.participation.name }}
+                                    <button name='unparticipate' value='{{ eater.participation.participant.pk }}' type='submit' class='btn btn-danger btn-xs'>{% bootstrap_icon 'remove' %}</button>
+                                {% endif %}
+                            {% endfor %}
+                            </ul>
+                        </form>
                         {% endif %}
-                        {% for eater in eaters %}
-                            {% if eater.bystander %}{{ eater.bystander.name }} (via {{ eater.participation.name }}){% else %} {{ eater.participation.name }}{% endif %}{% if not forloop.last %}{% ifequal forloop.revcounter 2 %} en {% else %}, {% endifequal %} {% endif %}
-                        {% endfor %}
                     </p>
                     <p>
                         <form method="post">

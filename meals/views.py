@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from meals.models import Meal, Wbw_list, Participant, Participation
+from meals.models import Meal, Wbw_list, Participant, Participation, Bystander
 from meals.forms import MealForm, WbwListsForm, ParticipationForm, BystanderForm
 from django.http import HttpResponse
 from django.conf import settings
@@ -50,6 +50,16 @@ def meal(request):
             form.instance.participant = participation.participant
             form.save()
             meal.bystanders.add(form.instance)
+            meal.save()
+            return redirect('meal')
+        elif 'unbystand' in request.POST:
+            pk = int(request.POST['unbystand'])
+            meal.bystanders.remove(Bystander.objects.get(pk=pk))
+            meal.save()
+            return redirect('meal')
+        elif 'unparticipate' in request.POST:
+            pk = int(request.POST['unparticipate'])
+            meal.participants.remove(Participant.objects.get(pk=pk))
             meal.save()
             return redirect('meal')
         elif 'abort' in request.POST:
