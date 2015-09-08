@@ -16,7 +16,7 @@ class EuroWidget(widgets.TextInput):
 
 
 class ParticipationForm(forms.Form):
-    participations = forms.ModelChoiceField(label='Betalende',
+    participations = forms.ModelChoiceField(label='Deelnemer',
                                             queryset=Participation.objects.all())
 
     def __init__(self, *args, **kwargs):
