@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from meals.models import Meal, Wbw_list, Participant, Participation, Bystander
 from meals.forms import MealForm, WbwListsForm, ParticipationForm, BystanderForm
-from django.http import HttpResponse
 from django.conf import settings
 from django.contrib import messages
 from django.utils.timezone import localtime
@@ -25,11 +24,11 @@ def meal(request):
         for p in meal.participants.all():
             participation = Participation.objects.get(participant=p,
                                                       wbw_list=meal.wbw_list)
-            eaters.append({'participation':participation, 'participant':p})
+            eaters.append({'participation': participation, 'participant': p})
         for b in meal.bystanders.all():
             participation = Participation.objects.get(participant=b.participant,
                                                       wbw_list=meal.wbw_list)
-            eaters.append({'participation':participation, 'bystander':b})
+            eaters.append({'participation': participation, 'bystander': b})
 
         # these should probably be split into different view functions
         if 'update' in request.POST:

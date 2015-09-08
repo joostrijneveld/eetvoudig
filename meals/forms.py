@@ -1,7 +1,5 @@
 from django.forms import ModelForm, widgets
 import django.forms as forms
-from django.forms.utils import flatatt
-from django.utils.html import format_html
 from meals.models import Meal, Wbw_list, Bystander, Participation
 
 
@@ -9,8 +7,8 @@ class EuroWidget(widgets.TextInput):
 
     def render(self, name, value, attrs=None):
         return ('<div class="input-group">\
-                    <span class="input-group-addon">€-cent</span>'+
-                    super(EuroWidget, self).render(name, value, attrs)+
+                 <span class="input-group-addon">€-cent</span>' +
+                super(EuroWidget, self).render(name, value, attrs) +
                 '</div>')
 
     def value_from_datadict(self, data, files, name):
