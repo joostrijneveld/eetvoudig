@@ -72,10 +72,10 @@
                     </p>
                     <hr />
                     <p>
-                        Deze maaltijd begon op <strong>{{ meal.date }}</strong>, en gaat uit van de lijst <strong>'{{ meal.wbw_list.name }}'</strong>.
+                        Deze maaltijd is laatst bewerkt op <strong>{{ meal.date }}</strong>, en gaat uit van de lijst <strong>'{{ meal.wbw_list.name }}'</strong>.
                     </p>
                     <p>
-                        <strong>Deelnemers</strong>
+                        <strong>Deelnemers [{{ eaters | length }}]</strong>
                     </p>
                     <p>
                         {% if not eaters %}
