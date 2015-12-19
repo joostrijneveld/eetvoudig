@@ -65,7 +65,9 @@ def meal(request):
             meal.delete()
             return redirect('meal')
         elif 'finalise' in request.POST:
-            context['form'] = MealForm(request.POST, instance=meal)
+            context['form'] = form = MealForm(request.POST, instance=meal)
+            if form.is_valid():
+                form.save()
             errors = False  # surely there's a more elegant way to do this
             if not meal.payer:
                 context['form'].add_error('payer', "Wie gaat dit geintje betalen?.")
