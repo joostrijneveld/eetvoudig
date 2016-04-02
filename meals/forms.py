@@ -3,7 +3,7 @@ import django.forms as forms
 from meals.models import Meal, Wbw_list, Bystander, Participation
 
 
-class EuroWidget(widgets.TextInput):
+class EuroWidget(widgets.NumberInput):
 
     def render(self, name, value, attrs=None):
         return ('<div class="input-group">\
