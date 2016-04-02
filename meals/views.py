@@ -114,6 +114,7 @@ def update_lists(request):
     soup = BeautifulSoup(response.text, 'html.parser')
     lists = [x.a for x in soup.tbody.findAll('td') if x.a is not None]
     listdata = [(x.attrs['href'][15:-13], x.text) for x in lists]
+    Wbw_list.objects.all().delete()
     for list_id, list_name in listdata:
         wbw_list, _ = Wbw_list.objects.get_or_create(list_id=list_id)
         wbw_list.name = list_name
