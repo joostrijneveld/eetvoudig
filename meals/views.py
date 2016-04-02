@@ -81,11 +81,17 @@ def meal(request):
             if not errors:
                 session, response = _create_wbw_session()
                 date = datetime.strftime(localtime(meal.date), "%d-%m-%Y")
+                desc = []
+                for b in meal.bystanders.all():
+                    part = Participation.objects.get(participant=b.participant,
+                                                     wbw_list=meal.wbw_list)
+                    desc.append("{} via {}".format(b.name, part.name))
+                desc = "{} ({})".format(meal.description, ', '.join(desc))
                 payload = defaultdict(lambda: 0,
                                       {'action': 'add_transaction',
                                        'lid': meal.wbw_list.list_id,
                                        'payment_by': meal.payer.wbw_id,
-                                       'description': meal.description,
+                                       'description': desc,
                                        'date': date,
                                        'amount': meal.price / 100,
                                        'submit_add': 'Verwerken'})
