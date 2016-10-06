@@ -6,10 +6,8 @@ from django.contrib import messages
 from django.utils.timezone import localtime
 from datetime import datetime
 
-from bs4 import BeautifulSoup
 import requests
 from itertools import chain
-from collections import defaultdict
 
 
 def meal(request):
@@ -80,25 +78,38 @@ def meal(request):
                 errors = True
             if not errors:
                 session, response = _create_wbw_session()
-                date = datetime.strftime(localtime(meal.date), "%d-%m-%Y")
+                date = datetime.strftime(localtime(meal.date), "%Y-%m-%d")
                 desc = []
                 for b in meal.bystanders.all():
                     part = Participation.objects.get(participant=b.participant,
                                                      wbw_list=meal.wbw_list)
                     desc.append("{} via {}".format(b.name, part.name))
                 desc = "{} ({})".format(meal.description, ', '.join(desc))
-                payload = defaultdict(lambda: 0,
-                                      {'action': 'add_transaction',
-                                       'lid': meal.wbw_list.list_id,
-                                       'payment_by': meal.payer.wbw_id,
-                                       'description': desc,
-                                       'date': date,
-                                       'amount': meal.price / 100,
-                                       'submit_add': 'Verwerken'})
-                for p in chain(meal.participants.all(),
-                               [b.participant for b in meal.bystanders.all()]):
-                    payload['factor[{}]'.format(p.wbw_id)] += 1
-                session.post('https://wiebetaaltwat.nl/index.php', payload)
+
+                payload = {'expense': {
+                    'payed_by_id': meal.payer.wbw_id,
+                    'name': desc,
+                    'payed_on': date,
+                    'amount': meal.price,
+                    'shares_attributes': []}}
+
+                participants = list(chain(meal.participants.all(),
+                                          [b.participant for b in
+                                           meal.bystanders.all()]))
+                amount_per_p = meal.price / len(participants)
+                for p in participants:
+                    payload['expense']['shares_attributes'].append({
+                        'member_id': p.wbw_id,
+                        'multiplier': 1,
+                        'amount': amount_per_p
+                    })
+
+                url = ('https://api.wiebetaaltwat.nl/api/lists/{}/expenses'
+                       .format(meal.wbw_list.list_id))
+                session.post(url,
+                             json=payload,
+                             headers={'Accept-Version': '1'},
+                             cookies=response.cookies)
                 meal.completed = True
                 meal.save()
                 messages.success(request, "De maaltijd is verwerkt!")
@@ -117,34 +128,43 @@ def meal(request):
 
 def update_lists(request):
     session, response = _create_wbw_session()
-    soup = BeautifulSoup(response.text, 'html.parser')
-    lists = [x.a for x in soup.tbody.findAll('td') if x.a is not None]
-    listdata = [(x.attrs['href'][15:-13], x.text) for x in lists]
+    response = session.get('https://api.wiebetaaltwat.nl/api/lists/',
+                           headers={'Accept-Version': '1'},
+                           cookies=response.cookies)
+    data = response.json()
+
     Wbw_list.objects.all().delete()
-    for list_id, list_name in listdata:
+    for item in data['data']:
+        list_id = item['list']['id']
+        list_name = item['list']['name']
         wbw_list, _ = Wbw_list.objects.get_or_create(list_id=list_id)
         wbw_list.name = list_name
         wbw_list.save()
-        url = 'https://wiebetaaltwat.nl/index.php?lid='+list_id+'&page=members'
-        response = session.get(url)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        trs = soup.tbody.findAll('tr')
-        userdata = [(tr.attrs['id'][7:], next(tr.td.span.children)) for tr in trs]
-        userdata = [(uid, name) for uid, name in userdata if uid != settings.WBW_UID]
+
+        url = ('https://api.wiebetaaltwat.nl/api/lists/{list_id}/members'
+               .format(list_id=list_id))
+        response = session.get(url,
+                               headers={'Accept-Version': '1'},
+                               cookies=response.cookies)
+        data = response.json()
         Participation.objects.filter(wbw_list=wbw_list).delete()
-        for uid, name in userdata:
+        for user_item in data['data']:
+            uid = user_item['member']['id']
+            name = user_item['member']['nickname']
             participant, _ = Participant.objects.get_or_create(wbw_id=uid)
             p = Participation(wbw_list=wbw_list, participant=participant)
             p.name = name
             p.save()
-        if len(userdata) == 0:
+        if len(data['data']) == 0:
             wbw_list.delete()
     return redirect('meal')
 
 
 def _create_wbw_session():
     session = requests.Session()
-    payload = {'action': 'login', 'username': settings.WBW_EMAIL,
-               'password': settings.WBW_PASSWORD, 'login_submit': 'Inloggen'}
-    response = session.post('https://wiebetaaltwat.nl', payload)
-    return (session, response)
+    payload = {'user[email]': settings.WBW_EMAIL,
+               'user[password]': settings.WBW_PASSWORD}
+    response = session.post('https://api.wiebetaaltwat.nl/api/users/sign_in',
+                            payload,
+                            headers={'Accept-Version': '1'})
+    return session, response
