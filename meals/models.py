@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Wbw_list(models.Model):
-    list_id = models.IntegerField(unique=True)
+    list_id = models.CharField(unique=True, max_length=40)
     name = models.CharField(max_length=200, blank=True)
 
     def __str__(self):
@@ -11,7 +11,7 @@ class Wbw_list(models.Model):
 
 class Participant(models.Model):
     wbw_list = models.ManyToManyField(Wbw_list, through='Participation')
-    wbw_id = models.IntegerField(unique=True)
+    wbw_id = models.CharField(unique=True, max_length=40)
 
 
 class Participation(models.Model):
