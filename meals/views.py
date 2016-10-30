@@ -109,6 +109,17 @@ def meal(request):
                     # so we ensure that the total amount is the sum of parts.
                     payload['expense']['amount'] += amount_per_p
 
+                # We must remove duplicate shares
+                shares = {}
+                for share in list(payload['expense']['shares_attributes']):
+                    if share['member_id'] not in shares:
+                        shares[share['member_id']] = share
+                    else:
+                        shares[share['member_id']]['multiplier'] += 1
+                        # Since multiplier and amount seem to be unrelated..
+                        shares[share['member_id']]['amount'] += amount_per_p
+                        payload['expense']['shares_attributes'].remove(share)
+
                 url = ('https://api.wiebetaaltwat.nl/api/lists/{}/expenses'
                        .format(meal.wbw_list.list_id))
                 session.post(url,
