@@ -150,6 +150,8 @@ def update_lists(request):
         Participation.objects.filter(wbw_list=wbw_list).delete()
         for user_item in data['data']:
             uid = user_item['member']['id']
+            if uid == settings.WBW_UID:
+                continue
             name = user_item['member']['nickname']
             participant, _ = Participant.objects.get_or_create(wbw_id=uid)
             p = Participation(wbw_list=wbw_list, participant=participant)
