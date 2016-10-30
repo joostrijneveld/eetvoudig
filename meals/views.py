@@ -1,3 +1,5 @@
+import math
+
 from django.shortcuts import render, redirect
 from meals.models import Meal, Wbw_list, Participant, Participation, Bystander
 from meals.forms import MealForm, WbwListsForm, ParticipationForm, BystanderForm
@@ -90,19 +92,22 @@ def meal(request):
                     'payed_by_id': meal.payer.wbw_id,
                     'name': desc,
                     'payed_on': date,
-                    'amount': meal.price,
+                    'amount': 0,
                     'shares_attributes': []}}
 
                 participants = list(chain(meal.participants.all(),
                                           [b.participant for b in
                                            meal.bystanders.all()]))
-                amount_per_p = meal.price / len(participants)
+                amount_per_p = math.ceil(meal.price / len(participants))
                 for p in participants:
                     payload['expense']['shares_attributes'].append({
                         'member_id': p.wbw_id,
                         'multiplier': 1,
                         'amount': amount_per_p
                     })
+                    # Wiebetaaltwat does not like to share beyond decimals
+                    # so we ensure that the total amount is the sum of parts.
+                    payload['expense']['amount'] += amount_per_p
 
                 url = ('https://api.wiebetaaltwat.nl/api/lists/{}/expenses'
                        .format(meal.wbw_list.list_id))
