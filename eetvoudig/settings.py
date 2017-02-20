@@ -101,6 +101,8 @@ USE_TZ = True
 WBW_EMAIL = 'replacemewithanemail'
 WBW_PASSWORD = 'replacemewithapassword'
 
+WARNING_EXTERNALS = False
+
 BOOTSTRAP3 = {
     'success_css_class': '',
 }

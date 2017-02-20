@@ -30,6 +30,9 @@ def meal(request):
                                                       wbw_list=meal.wbw_list)
             eaters.append({'participation': participation, 'bystander': b})
 
+        # add warning for eaters not in the wbw list
+        context['warning_externals'] = settings.WARNING_EXTERNALS
+
         # these should probably be split into different view functions
         if 'update' in request.POST:
             context['form'] = form = MealForm(request.POST, instance=meal)
